@@ -13,11 +13,13 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 import com.example.mypopularmovie.models.Movie;
 
+import java.util.List;
+
 public class Image extends RecyclerView.Adapter<Image.ViewHolder> {
-    private final Movie[] mv;
+    private final List<Movie> mv;
     private final Context context;
 
-    public Image(Movie[] mv, Context cnt) {
+    public Image(List<Movie> mv, Context cnt) {
         this.mv = mv;
         context = cnt;
     }
@@ -43,7 +45,7 @@ public class Image extends RecyclerView.Adapter<Image.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         Picasso.with(context)
-                .load(mv[position].getPosterPath())
+                .load("https://image.tmdb.org/t/p/w500/"+mv.get(position).getPosterPath())
                 .fit()
                 .error(R.mipmap.ic_launcher_round)
                 .placeholder(R.mipmap.ic_launcher_round)
@@ -51,7 +53,7 @@ public class Image extends RecyclerView.Adapter<Image.ViewHolder> {
 
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(context, MovieDetail.class);
-            intent.putExtra("movie", mv[position]);
+            intent.putExtra("movie", mv.get(position));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
@@ -59,11 +61,11 @@ public class Image extends RecyclerView.Adapter<Image.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        if (mv == null || mv.length == 0) {
+        if (mv == null || mv.size() == 0) {
             return -1;
         }
 
-        return mv.length;
+        return mv.size();
     }
 
 }

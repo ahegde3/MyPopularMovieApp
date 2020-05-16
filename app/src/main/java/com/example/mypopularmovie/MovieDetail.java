@@ -27,16 +27,16 @@ public class MovieDetail extends AppCompatActivity {
             closeOnError();
         }  Movie movie;
         try {
-             movie = intent.getParcelableExtra("movie");
+             movie = (Movie)intent.getParcelableExtra("movie");
         }catch(Exception e) {throw e;}
 
         // TITLE
         originalTitleTV.setText(movie.getOriginalTitle());
         // VOTER AVERAGE / RATING
-        ratingTV.setText (String.valueOf(movie.getVoterAverage ()) + " / 10");
+        ratingTV.setText (String.valueOf(movie.getVoteAverage()) + " / 10");
         // IMAGE
         Picasso.with(this)
-                .load(movie.getPosterPath())
+                .load("https://image.tmdb.org/t/p/w500/"+movie.getPosterPath())
                 .fit()
                 .error(R.mipmap.ic_launcher_round)
                 .placeholder(R.mipmap.ic_launcher_round)

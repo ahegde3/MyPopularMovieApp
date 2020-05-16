@@ -19,7 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class JsonUtil {
-    final static String MOVIEDB_BASE_URL = "http://api.themoviedb.org/3/movie/";
+    final static String MOVIEDB_BASE_URL = "http://api.themoviedb.org/3/";
     final static String API_KEY = "49cedaedd21232e07523c4105be0c104";
 
     public static final String  TITLE = "title",

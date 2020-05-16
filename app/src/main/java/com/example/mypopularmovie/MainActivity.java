@@ -1,5 +1,6 @@
 package com.example.mypopularmovie;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.Spinner;
 
 import com.example.mypopularmovie.models.Movie;
+import com.example.mypopularmovie.models.MovieList;
 import com.example.mypopularmovie.util.JsonUtil;
 import com.example.mypopularmovie.util.SharedPrefUtil;
 
@@ -28,11 +30,13 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,11 +50,14 @@ public class MainActivity extends AppCompatActivity {
     Movie[] movies;
     Image mImageAdapter;
     Menu mMenu;
+  //  List<Movie> mv;
+    MainActivity ma;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+         ma=MainActivity.this;
 
         //Setting recycler View
         rv=findViewById(R.id.rv);
@@ -64,39 +71,18 @@ public class MainActivity extends AppCompatActivity {
     }
         //setting spinner
         spin=findViewById(R.id.spinner);
-        /*JsonUtil.retroGetInstance().create(MovieService.class)
-                    .getMovie("49cedaedd21232e07523c4105be0c104")
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(new DisposableObserver<Movie>() {
 
 
-                        @Override
-                        public void onNext(Movie movie) {
-                            mImageAdapter = new Image(movies,getApplicationContext());
-                            rv.setAdapter(mImageAdapter);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                      Log.d("retro","onError"+e.toString());
-                        }
-
-                        @Override
-                        public void onComplete() {
-                     Log.d("retro","complete");
-                        }
-                    });*/
-        final int currentSelection=spin.getSelectedItemPosition();
+       final int currentSelection=spin.getSelectedItemPosition();
         if(true){
         spin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (currentSelection == i) {
                     // If most popular was selected
-                    new FetchDataAsyncTask().execute(POPULAR_QUERY);
+                    fetchData(POPULAR_QUERY);
                 } else {
                     // If top rated was selected
-                    new FetchDataAsyncTask().execute(TOP_RATED_QUERY);
+                    fetchData(TOP_RATED_QUERY);
                 }
             }
             @Override
@@ -107,6 +93,42 @@ public class MainActivity extends AppCompatActivity {
             Log.d("MainActivty", "Network not connected");
         }
 
+
+    }
+    public void fetchData(String path)
+    {
+
+
+
+        JsonUtil.retroGetInstance().create(MovieService.class)
+                .getMovie(path,"49cedaedd21232e07523c4105be0c104")
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new DisposableObserver<MovieList>() {
+
+
+
+                    @Override
+                    public void onNext(@NonNull MovieList movie) {
+                        Log.d("retro","onNext");
+                        // mv=movie.getMovies();
+                        ma.display(movie.getMovies());
+
+                        // mImageAdapter = new Image(movie,getApplicationContext());
+                        // rv.setAdapter(mImageAdapter);
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("retro","onError"+e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("retro","complete");
+                    }
+                });
 
     }
     @Override
@@ -159,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
             mMenu.findItem(R.id.action_list_item).setVisible(false);
         }
     }
-    public class FetchDataAsyncTask extends AsyncTask<String, Void, Movie[]> {
+ /*   public class FetchDataAsyncTask extends AsyncTask<String, Void, Movie[]> {
         public FetchDataAsyncTask() {
             super();
         }
@@ -230,9 +252,21 @@ public Movie[] makeMoviesDataToArray(String moviesJsonResults) throws JSONExcept
         movies[i].setReleaseDate(movieInfo.getString(RELEASE_DATE));
     }
     return movies;
-}/*
-public interface MovieService{
-        @GET("movie/popular")
-        Observable<Movie> getMovie(@Query("api_key") String api_key) ;
 }*/
+
+
+    public void display(List<Movie> mov)
+    {
+        if (mov != null) {
+            mImageAdapter = new Image(mov, getApplicationContext());
+            rv.setAdapter(mImageAdapter);
+            Log.d("retro","adapter attached");
+        } else {
+            Log.d("retro", "movie response is null");
+        }
+    }
+public interface MovieService{
+        @GET("movie/{path}")
+        Observable<MovieList> getMovie(@Path("path") String path,@Query("api_key") String api_key) ;
+}
 }
