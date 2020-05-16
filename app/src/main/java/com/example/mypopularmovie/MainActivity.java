@@ -4,14 +4,18 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 
 import com.example.mypopularmovie.models.Movie;
 import com.example.mypopularmovie.util.JsonUtil;
+import com.example.mypopularmovie.util.SharedPrefUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,16 +45,23 @@ public class MainActivity extends AppCompatActivity {
     Spinner spin;
     Movie[] movies;
     Image mImageAdapter;
+    Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         //Setting recycler View
         rv=findViewById(R.id.rv);
         manager= new GridLayoutManager(this,column);
         rv.setLayoutManager(manager);
-
+        int defaultlayout= SharedPrefUtil.getItemType(this);
+        if(defaultlayout==1) {
+            setGridLayout();
+    } else {
+        setListLayout();
+    }
         //setting spinner
         spin=findViewById(R.id.spinner);
         /*JsonUtil.retroGetInstance().create(MovieService.class)
@@ -97,6 +108,56 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        mMenu = menu;
+        updateMenu();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_list_item:
+                setListLayout();
+                break;
+            case R.id.action_grid_item:
+                setGridLayout();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public void setGridLayout() {
+        SharedPrefUtil.saveItemType(this, SharedPrefUtil.GRID_LAYOUT_ID);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        rv.setLayoutManager(gridLayoutManager);
+        updateMenu();
+      }
+    private void setListLayout() {
+        SharedPrefUtil.saveItemType(this, SharedPrefUtil.LIST_LAYOUT_ID);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        rv.setLayoutManager(linearLayoutManager);
+        updateMenu();
+    }
+
+    private void updateMenu() {
+        if (mMenu == null) {
+            return;
+        }
+        int defaultLayout = SharedPrefUtil.getItemType(this);
+        if (defaultLayout == SharedPrefUtil.GRID_LAYOUT_ID) {
+            mMenu.findItem(R.id.action_grid_item).setVisible(false);
+            mMenu.findItem(R.id.action_list_item).setVisible(true);
+        } else {
+            mMenu.findItem(R.id.action_grid_item).setVisible(true);
+            mMenu.findItem(R.id.action_list_item).setVisible(false);
+        }
     }
     public class FetchDataAsyncTask extends AsyncTask<String, Void, Movie[]> {
         public FetchDataAsyncTask() {

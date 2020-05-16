@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MyPopularMovies</string>
-
+    <string name="listview">ListView</string>
+    <string name="grid_view">GridView</string>
     <string-array name="sort_options">
         <item>Most Popular</item>
         <item>Top Rated</item>
